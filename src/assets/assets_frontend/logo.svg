@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="140 125 1157 497">
+  <title id="title">DocConnect horizontal logo</title>
+  <desc id="desc">DocConnect healthcare logo with medical icon on the left and wordmark on the right.</desc>
+
+  <defs>
+    <linearGradient id="blueTeal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1265B0"/>
+      <stop offset="100%" stop-color="#25B8B1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon -->
+  <g transform="translate(85 135)">
+    <!-- Medical cross -->
+    <path fill="url(#blueTeal)" d="       M190 35 C190 10 210 -10 235 -10 H315 C340 -10 360 10 360 35 V125       H450 C475 125 495 145 495 170 V250 C495 275 475 295 450 295 H360       V385 C360 410 340 430 315 430 H235 C210 430 190 410 190 385 V295       H100 C75 295 55 275 55 250 V170 C55 145 75 125 100 125 H190 Z"/>
+
+    <!-- Doctor -->
+    <circle cx="275" cy="125" r="48" fill="#fff"/>
+    <path fill="#fff" d="       M165 330 C170 245 210 205 275 205 C340 205 380 245 385 330       L385 385 C385 405 370 420 350 420 H200 C180 420 165 405 165 385 Z"/>
+
+    <!-- Collar -->
+    <path fill="url(#blueTeal)" d="M235 207 L275 252 L315 207 L300 198 L275 228 L250 198 Z"/>
+
+    <!-- Stethoscope -->
+    <path d="M220 235 C208 270 210 305 235 318 C260 331 278 313 278 293" fill="none" stroke="#1265B0" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="238" cy="301" r="20" fill="#fff" stroke="#1265B0" stroke-width="11"/>
+    <path d="M278 293 C278 340 305 356 331 338 C344 329 349 315 349 301" fill="none" stroke="#1265B0" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="349" cy="301" r="11" fill="#1265B0"/>
+
+    <!-- Calendar -->
+    <rect x="305" y="270" width="180" height="175" rx="22" fill="#fff" stroke="#1265B0" stroke-width="13"/>
+    <path d="M305 320 H485" stroke="#1265B0" stroke-width="13"/>
+    <path d="M350 255 V295 M440 255 V295" stroke="#1265B0" stroke-width="12" stroke-linecap="round"/>
+
+    <g fill="#9CCFE7">
+      <rect x="337" y="340" width="28" height="28" rx="4"/>
+      <rect x="380" y="340" width="28" height="28" rx="4"/>
+      <rect x="423" y="340" width="28" height="28" rx="4"/>
+      <rect x="337" y="383" width="28" height="28" rx="4"/>
+      <rect x="380" y="383" width="28" height="28" rx="4"/>
+      <rect x="423" y="383" width="28" height="28" rx="4"/>
+    </g>
+
+    <!-- Confirmation badge -->
+    <circle cx="455" cy="435" r="48" fill="#20B6B2" stroke="#fff" stroke-width="8"/>
+    <path d="M430 435 L448 453 L482 415" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="625" y="390" font-family="Arial, Helvetica, sans-serif" font-size="122" font-weight="700" letter-spacing="-5">
+    <tspan fill="#123A67">Doc</tspan><tspan fill="#20AAA9">Connect</tspan>
+  </text>
+
+  <!-- Tagline -->
+  <text x="632" y="460" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="500" letter-spacing="9" fill="#34516D">
+    HEALTHCARE MADE EASIER
+  </text>
+</svg>
