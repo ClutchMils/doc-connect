@@ -22,7 +22,6 @@ const SpecialityMenu = () => {
           </Link>
         ))}
       </div>
-      <img src="" alt="" />
     </div>
   );
 }
