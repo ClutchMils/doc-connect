@@ -1,19 +1,23 @@
 import React, { useState } from "react";
 import { assets } from "../assets/assets_frontend/assets";
+import { useContext } from "react";
+import { AppContext } from "../context/AppContext";
 
 const MyProfile = () => {
-  const [userData, setUserData] = useState({
-    name: "Edward Vincent",
-    image: assets.profile_pic,
-    email: "prancer_dret@outlook.com",
-    phone: "+1  123 456 7890",
-    address: {
-      line1: "57th Cross, Richmond ",
-      line2: "Circle, Church Road, London",
-    },
-    gender: "Male",
-    dob: "2000-01-02",
-  });
+  // const [userData, setUserData] = useState({
+  //   name: "Edward Vincent",
+  //   image: assets.profile_pic,
+  //   email: "prancer_dret@outlook.com",
+  //   phone: "+1  123 456 7890",
+  //   address: {
+  //     line1: "57th Cross, Richmond ",
+  //     line2: "Circle, Church Road, London",
+  //   },
+  //   gender: "Male",
+  //   dob: "2000-01-02",
+  // });
+
+  const {userData, setUserData} = useContext(AppContext)
 
   const [isEdit, setIsEdit] = useState(false);
 
@@ -84,8 +88,9 @@ const MyProfile = () => {
             </p>
           ) : (
             <p className="text-gray-500">
-              {userData.address.line1} <br />
-              {userData.address.line2}
+              {/* {userData.address.line1} <br />
+              {userData.address.line2} */}
+              test
             </p>
           )}
         </div>

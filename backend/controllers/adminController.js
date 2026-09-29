@@ -4,7 +4,7 @@ import fs from "fs";
 import imagekit from "../config/imagekit.js";
 import doctorModel from "../models/doctorsModel.js";
 import jwt from "jsonwebtoken";
-import 'dotenv/config'
+import "dotenv/config";
 
 // API for adding doctor
 const addDoctor = async (req, res) => {
@@ -109,12 +109,12 @@ const addDoctor = async (req, res) => {
     });
   } catch (error) {
     console.log("ADD DOCTOR ERROR:", error);
-    // res.json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message });
 
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    // return res.status(500).json({
+    //   success: false,
+    //   message: error.message,
+    // });
   }
 };
 
@@ -140,12 +140,25 @@ const loginAdmin = async (req, res) => {
     }
   } catch (error) {
     console.log("Admin Login ERROR:", error);
+    res.json({ success: false, message: error.message });
 
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    // return res.status(500).json({
+    //   success: false,
+    //   message: error.message,
+    // });
   }
 };
 
-export { addDoctor, loginAdmin };
+// API to get all doctors list for admin panel
+const allDoctors = async (req, res) => {
+  try {
+    const doctors = await doctorModel.find({}).select("-password");
+    res.json({ success: true, doctors });
+  } catch (error) {
+    console.log("All Doctors ERROR:", error);
+    res.json({ success: false, message: error.message });
+
+  }
+};
+
+export { addDoctor, loginAdmin, allDoctors };
