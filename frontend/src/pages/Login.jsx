@@ -126,7 +126,7 @@ const Login = () => {
               onClick={() => setLoginType("Sign up")}
               className="text-primary underline cursor-pointer"
             >
-              click herei
+              click here
             </span>
           </p>
         )}
