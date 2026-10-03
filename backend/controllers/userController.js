@@ -3,7 +3,7 @@ import bycrypt from "bcrypt";
 import userModel from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import imagekit from "../config/imagekit.js";
-import fs from "fs"
+import fs from "fs";
 import doctorModel from "../models/doctorsModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 
@@ -108,31 +108,29 @@ const updateProfile = async (req, res) => {
     });
 
     if (imageFile) {
-     
       // upload image to ImageKit
 
-       console.log("Starting ImageKit upload...");
-          // Read the local file as a buffer or base64 string
-          const fileBuffer = fs.readFileSync(imageFile.path);
-      
-          console.log("File read successfully");
-          console.log("Uploading to ImageKit");
-      
-          const uploadResponse = await imagekit.upload({
-            file: fileBuffer,
-            fileName: imageFile.originalname,
-          });
-      
-          console.log("ImageKit response:", uploadResponse);
-      
-          // ImageKit provides the HTTPS URL via `.url`
-          const imageUrl = uploadResponse.url;
+      console.log("Starting ImageKit upload...");
+      // Read the local file as a buffer or base64 string
+      const fileBuffer = fs.readFileSync(imageFile.path);
 
-          await userModel.findByIdAndUpdate(userId, {image:imageUrl})
+      console.log("File read successfully");
+      console.log("Uploading to ImageKit");
+
+      const uploadResponse = await imagekit.upload({
+        file: fileBuffer,
+        fileName: imageFile.originalname,
+      });
+
+      console.log("ImageKit response:", uploadResponse);
+
+      // ImageKit provides the HTTPS URL via `.url`
+      const imageUrl = uploadResponse.url;
+
+      await userModel.findByIdAndUpdate(userId, { image: imageUrl });
     }
 
-    res.json({success:true,message:"Profile updated"})
-
+    res.json({ success: true, message: "Profile updated" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
@@ -142,37 +140,36 @@ const updateProfile = async (req, res) => {
 // API to book appointment
 const bookAppointment = async (req, res) => {
   try {
+    const { userId, docId, slotDate, slotTime } = req.body;
 
-    const {userId, docId, slotDate, slotTime} = req.body
-
-    const docData = await doctorModel.findById(docId).select('-password')
+    const docData = await doctorModel.findById(docId).select("-password");
 
     if (!docData.available) {
       return res.json({
-        success:false,
-        message:"Doctor not available",
-      })
+        success: false,
+        message: "Doctor not available",
+      });
     }
 
-    let slots_booked = docData.slots_booked
+    let slots_booked = docData.slots_booked;
 
     // checking for slot availability
     if (slots_booked[slotDate]) {
       if (slots_booked[slotDate].includes(slotTime)) {
         return res.json({
-          success:false,
-          message:'Slot not available'
-        })
+          success: false,
+          message: "Slot not available",
+        });
       } else {
-        slots_booked[slotDate].push(slotTime)
+        slots_booked[slotDate].push(slotTime);
       }
     } else {
-      slots_booked[slotDate] = []
-      slots_booked[slotDate].push(slotTime)
+      slots_booked[slotDate] = [];
+      slots_booked[slotDate].push(slotTime);
     }
 
-    const userData = await userModel.findById(userId).select('-password')
-    delete docData.slots_booked
+    const userData = await userModel.findById(userId).select("-password");
+    delete docData.slots_booked;
 
     const appointmentData = {
       userId,
@@ -186,39 +183,86 @@ const bookAppointment = async (req, res) => {
     };
 
     const newAppointment = new appointmentModel(appointmentData);
-    await newAppointment.save()
+    await newAppointment.save();
 
     // save new slots data in docData
-    await doctorModel.findByIdAndUpdate(docId, {slots_booked})
+    await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
     res.json({
-      success:true,
-      message:'Appointment booked'
-    })
-    
+      success: true,
+      message: "Appointment booked",
+    });
   } catch (error) {
-     console.log(error);
-     res.json({ success: false, message: error.message });
+    console.log(error);
+    res.json({ success: false, message: error.message });
   }
-}
+};
 
 // API to get user appointments for frontend my-appointments page
-const listAppointment = async (req,res) => {
-  
+const listAppointment = async (req, res) => {
   try {
-    
-    const {userId} = req.body
-    const appointments = await appointmentModel.find({userId})
+    const { userId } = req.body;
+    const appointments = await appointmentModel.find({ userId });
 
-    res.json({success:true,appointments})
-
+    res.json({ success: true, appointments });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.json({
-      success:false,
-      message:error.message
-    })
+      success: false,
+      message: error.message,
+    });
   }
-}
+};
 
-export { registerUser, loginUser, getProfile, updateProfile, bookAppointment, listAppointment };
+// API to cancel appointment
+const cancelAppointment = async (req, res) => {
+  try {
+    const { userId, appointmentId } = req.body;
+
+    const appointmentData = await appointmentModel.findById(appointmentId);
+
+    // verify appointment user
+    if (appointmentData.userId !== userId) {
+      return res.json({
+        success: false,
+        message: "Unauthorized action",
+      });
+    }
+
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      cancelled: true,
+    });
+
+    // releasing doctor slot
+
+    const { docId, slotDate, slotTime } = appointmentData;
+
+    const doctorData = await doctorModel.findById(docId);
+
+    let slots_booked = doctorData.slots_booked;
+
+    slots_booked[slotDate] = slots_booked[slotDate].filter(
+      (e) => e !== slotTime,
+    );
+
+    await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+
+    res.json({ success: true, message: "Appointment Cancelled" });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export {
+  registerUser,
+  loginUser,
+  getProfile,
+  updateProfile,
+  bookAppointment,
+  listAppointment,
+  cancelAppointment,
+};
