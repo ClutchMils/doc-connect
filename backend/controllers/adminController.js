@@ -5,6 +5,7 @@ import imagekit from "../config/imagekit.js";
 import doctorModel from "../models/doctorsModel.js";
 import jwt from "jsonwebtoken";
 import "dotenv/config";
+import appointmentModel from "../models/appointmentModel.js";
 
 // API for adding doctor
 const addDoctor = async (req, res) => {
@@ -21,9 +22,6 @@ const addDoctor = async (req, res) => {
       address,
     } = req.body;
     const imageFile = req.file;
-
-    // console.log("BODY:", req.body);
-    // console.log("FILE:", req.file);
 
     // checking for all data to add doctor
     if (
@@ -109,12 +107,7 @@ const addDoctor = async (req, res) => {
     });
   } catch (error) {
     console.log("ADD DOCTOR ERROR:", error);
-    return res.json({ success: false, message: error.message });
-
-    // return res.status(500).json({
-    //   success: false,
-    //   message: error.message,
-    // });
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -141,11 +134,6 @@ const loginAdmin = async (req, res) => {
   } catch (error) {
     console.log("Admin Login ERROR:", error);
     res.json({ success: false, message: error.message });
-
-    // return res.status(500).json({
-    //   success: false,
-    //   message: error.message,
-    // });
   }
 };
 
@@ -157,8 +145,59 @@ const allDoctors = async (req, res) => {
   } catch (error) {
     console.log("All Doctors ERROR:", error);
     res.json({ success: false, message: error.message });
-
   }
 };
 
-export { addDoctor, loginAdmin, allDoctors };
+// API to get all appointment lis
+const appointmentAdmin = async (req, res) => {
+  try {
+    const appointments = await appointmentModel.find({});
+    res.json({ success: true, appointments });
+  } catch (error) {
+    console.log("All Doctors ERROR:", error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// API to for appointment cancellation
+const appointmentCancel = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+
+    const appointmentData = await appointmentModel.findById(appointmentId);
+
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      cancelled: true,
+    });
+
+    // releasing doctor slot
+
+    const { docId, slotDate, slotTime } = appointmentData;
+
+    const doctorData = await doctorModel.findById(docId);
+
+    let slots_booked = doctorData.slots_booked;
+
+    slots_booked[slotDate] = slots_booked[slotDate].filter(
+      (e) => e !== slotTime,
+    );
+
+    await doctorModel.findByIdAndUpdate(docId, { slots_booked });
+
+    res.json({ success: true, message: "Appointment Cancelled" });
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export {
+  addDoctor,
+  loginAdmin,
+  allDoctors,
+  appointmentAdmin,
+  appointmentCancel,
+};

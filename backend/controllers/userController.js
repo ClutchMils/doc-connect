@@ -7,8 +7,8 @@ import fs from "fs";
 import doctorModel from "../models/doctorsModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 
-// API  to register user
 
+// API  to register user
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -264,5 +264,5 @@ export {
   updateProfile,
   bookAppointment,
   listAppointment,
-  cancelAppointment,
+  cancelAppointment
 };
