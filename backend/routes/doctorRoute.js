@@ -1,8 +1,9 @@
 import express from 'express'
-import { doctorList } from '../controllers/doctorsController.js'
+import { doctorList, loginDoctor } from '../controllers/doctorsController.js'
 
 const doctorRouter = express.Router()
 
 doctorRouter.get('/list', doctorList)
+doctorRouter.post('/login', loginDoctor)
 
 export default doctorRouter
