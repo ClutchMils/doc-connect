@@ -6,15 +6,36 @@ import { toast } from "react-toastify";
 import { useEffect } from "react";
 
 const MyAppointments = () => {
-  const { backendUrl, token, getDoctorsData  } = useContext(AppContext);
+  const { backendUrl, token, getDoctorsData } = useContext(AppContext);
 
   const [appointments, setAppointments] = useState([]);
-  const months = ['','Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul','Aug','Sep','Oct','Nov','Dec']
+  const months = [
+    "",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
   const slotDateFormat = (slotDate) => {
-    const dateArray = slotDate.split('_')
-    return " " + dateArray[0] + " " + months[Number(dateArray[1])] + " " + dateArray[2]
-  }
+    const dateArray = slotDate.split("_");
+    return (
+      " " +
+      dateArray[0] +
+      " " +
+      months[Number(dateArray[1])] +
+      " " +
+      dateArray[2]
+    );
+  };
 
   const getUserAppointments = async () => {
     try {
@@ -34,26 +55,48 @@ const MyAppointments = () => {
   const cancelAppointment = async (appointmentId) => {
     try {
       const { data } = await axios.post(
-        backendUrl +
-        "/api/user/cancel-appointment",
-        { appointmentId }, {headers:{token}}
+        backendUrl + "/api/user/cancel-appointment",
+        { appointmentId },
+        { headers: { token } },
       );
       if (data.success) {
-        toast.success(data.message)
-        
-        getUserAppointments()
+        toast.success(data.message);
+
+        getUserAppointments();
         getDoctorsData();
       } else {
-        
-        toast.error(data.message)
+        toast.error(data.message);
         console.log(data.UserId);
       }
     } catch (error) {
-  
-      console.log(error)
+      console.log(error);
+      toast.error(error.message);
+    }
+  };
+
+  const appointmentStripe = async (appointmentId) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/user/payment-stripe",
+        { appointmentId },
+        {
+          headers: { token },
+        },
+      );
+
+      console.log("Stripe response:", data);
+
+      if (data.success && data.sessionUrl) {
+        window.location.href = data.sessionUrl;
+      } else {
+        console.error("Payment initiation failed:", data);
+        toast.error(data.message)
+      }
+    } catch (error) {
+      console.error("Payment error:", error.response?.data || error.message);
       toast.error(error.message)
     }
-  }
+  };
 
   useEffect(() => {
     if (token) {
@@ -98,13 +141,21 @@ const MyAppointments = () => {
 
             <div></div>
             <div className="flex flex-col gap-2 justify-end">
-              {!item.cancelled && (
-                <button className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300 ">
+              {!item.cancelled && item.payment && !item.isCompleted && (
+                <button className="sm:min-48 py-2 border rounded text-stone-500 bg-indigo-50">
+                  Paid
+                </button>
+              )}
+              {!item.cancelled && !item.payment && !item.isCompleted && (
+                <button
+                  onClick={() => appointmentStripe(item._id)}
+                  className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300 "
+                >
                   Pay Online
                 </button>
               )}
 
-              {!item.cancelled && (
+              {!item.cancelled && !item.isCompleted && (
                 <button
                   onClick={() => cancelAppointment(item._id)}
                   className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300"
@@ -112,7 +163,16 @@ const MyAppointments = () => {
                   Cancel Appointment
                 </button>
               )}
-              {item.cancelled && <button className="sm:min-w-48 py-2 border border-red-500 rounded text-red-500">Appointment cancelled</button>}
+              {item.cancelled && !item.isCompleted && (
+                <button className="sm:min-w-48 py-2 border border-red-500 rounded text-red-500">
+                  Appointment cancelled
+                </button>
+              )}
+              {item.isCompleted && (
+                <button className="sm:min-w-48 py-2 border border-green-500 rounded text-green-500">
+                  Completed
+                </button>
+              )}
             </div>
           </div>
         ))}

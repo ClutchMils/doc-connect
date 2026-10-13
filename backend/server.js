@@ -1,20 +1,29 @@
 import express from 'express'
 import cors from 'cors'
-import 'dotenv/config'
 import connectDB from './config/mongodb.js'
 
 import adminRouter from './routes/adminRoute.js'
 import doctorRouter from './routes/doctorRoute.js'
 import userRouter from './routes/userRoute.js'
 
+import { stripeWebhook } from "./controllers/webhookController.js";
+
+
+
 
 
 // app config
 const app = express()
+
 const port = process.env.PORT || 4000
 connectDB()
 
-
+// Register the webhook BEFORE express.json()
+app.post(
+  "/api/user/stripe-webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhook,
+);
 
 //middlewares
 app.use(express.json())

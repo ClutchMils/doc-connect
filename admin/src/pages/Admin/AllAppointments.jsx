@@ -42,7 +42,7 @@ const AllAppointments = () => {
                 className="w-8 rounded-full bg-gray-200"
                 src={item.userData.image}
                 alt=""
-              />{" "}
+              />
               <p>{item.userData.name}</p>
             </div>
             <p className="max-sm:hidden">{calculateAge(item.userData.dob)}</p>
@@ -63,6 +63,8 @@ const AllAppointments = () => {
             </p>
             {item.cancelled ? (
               <p className="text-red-400 text-xs font-medium">Cancelled</p>
+            ) : item.isCompleted ? (
+              <p className="text-green-500 text-xs font-medium">Completed</p>
             ) : (
               <img
                 onClick={() => cancelAppointment(item._id)}

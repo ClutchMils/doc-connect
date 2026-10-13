@@ -4,7 +4,6 @@ import fs from "fs";
 import imagekit from "../config/imagekit.js";
 import doctorModel from "../models/doctorsModel.js";
 import jwt from "jsonwebtoken";
-import "dotenv/config";
 import appointmentModel from "../models/appointmentModel.js";
 import userModel from "../models/userModel.js";
 

@@ -6,6 +6,8 @@ import imagekit from "../config/imagekit.js";
 import fs from "fs";
 import doctorModel from "../models/doctorsModel.js";
 import appointmentModel from "../models/appointmentModel.js";
+import Stripe from 'stripe'
+import "dotenv/config";
 
 
 // API  to register user
@@ -257,6 +259,110 @@ const cancelAppointment = async (req, res) => {
   }
 };
 
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// API to make payment of appointment using stripe
+const paymentStripe = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+
+    // Find the appointment
+    const appointmentData =
+      await appointmentModel.findById(appointmentId);
+
+    // Check whether the appointment exists
+    if (!appointmentData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Appointment not found',
+      });
+    }
+
+    // Check whether the appointment is cancelled
+    if (appointmentData.cancelled) {
+      return res.status(400).json({
+        success: false,
+        message: 'Appointment has been cancelled',
+      });
+    }
+
+    // Verify that this appointment belongs to the logged-in user.
+    if (
+      appointmentData.userId.toString() !== req.body.userId.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'You cannot pay for this appointment',
+      });
+    }
+
+    // Prevent paying for an appointment twice
+    if (appointmentData.payment) {
+      return res.status(400).json({
+        success: false,
+        message: 'Appointment has already been paid',
+      });
+    }
+
+    // Create a Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+
+      line_items: [
+        {
+          price_data: {
+            currency: process.env.CURRENCY || "usd",
+
+            product_data: {
+              name: "Doctor Appointment",
+            },
+
+            // Stripe expects the amount in the currency's
+            // smallest unit. For USD, $50.00 becomes 5000.
+            unit_amount: Math.round(appointmentData.amount * 100),
+          },
+
+          quantity: 1,
+        },
+      ],
+
+      // Store the appointment ID for webhook reconciliation
+      metadata: {
+        appointmentId: appointmentData._id.toString(),
+        userId: req.body.userId.toString(),
+      },
+
+      // Metadata attached to the PaymentIntent
+      payment_intent_data: {
+        metadata: {
+          appointmentId: appointmentData._id.toString(),
+          userId: req.body.userId.toString(),
+        },
+      },
+
+      success_url: `${process.env.FRONTEND_URL}/payment-success`,
+
+      cancel_url: `${process.env.FRONTEND_URL}/my-appointments`,
+    });
+
+    console.log("Stripe session metadata:", session.metadata);
+
+    return res.json({
+      success: true,
+      sessionUrl: session.url,
+    });
+
+  } catch (error) {
+    console.error('STRIPE PAYMENT ERROR:', error);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to initiate payment',
+    });
+  }
+};
+
 export {
   registerUser,
   loginUser,
@@ -264,5 +370,6 @@ export {
   updateProfile,
   bookAppointment,
   listAppointment,
-  cancelAppointment
+  cancelAppointment,
+  paymentStripe
 };

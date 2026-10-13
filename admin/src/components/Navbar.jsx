@@ -4,9 +4,11 @@ import { assets } from "../assets/assets_admin/assets.js";
 import { AdminContext } from "../context/AdminContext";
 import { useContext } from "react";
 import {useNavigate} from "react-router-dom"
+import { DoctorContext } from "../context/DoctorContext.jsx";
 
 const Navbar = () => {
   const { aToken, setAToken } = useContext(AdminContext);
+  const {dToken, setDToken} = useContext(DoctorContext)
 
   const navigate = useNavigate()
 
@@ -14,6 +16,8 @@ const Navbar = () => {
     navigate("/");
     aToken && setAToken('')
     aToken && localStorage.removeItem('aToken')
+    dToken && setDToken('')
+    dToken && localStorage.removeItem('dToken')
   }
 
   return (
